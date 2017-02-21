@@ -48,7 +48,7 @@
 		},
 		children(selector){
 			var dom = [];
-			
+
 		},
 		find(selector){
 			var type = T.type(selector);
@@ -62,10 +62,16 @@
 			return W(dom);
 		},
 		not(selector) {
+			var type = T.type(selector);
+			if (type == "string") {
 
+			}
 		},
-		addClass(){
-
+		addClass(value = ""){
+			this.each(elem => {
+				elem.className += " " + value
+			})
+			return this;
 		},
 		attr(key, value){
 			var attribute = (elem, key, value) =>{
@@ -158,7 +164,7 @@
 	window.$ = window.$ || W; 
 
 	//log( Wo.matches(document.getElementsByClassName("k")[0] , ".i") );
-	log(W("#child, #parent").find());
+	log(W("#child, #parent").addClass("k"));
 
 
 }) )
