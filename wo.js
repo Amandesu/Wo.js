@@ -103,14 +103,21 @@
 			});
 			return W(T.unique(dom))
 		},
+		closest(selector, context){
+
+
+		},
 		siblings(selector, hasOwn){
 			if (T.isBoolean(selector)) [selector, hasOwn] = [hasOwn, selector]  //重载
 			var dom = [];
 			this.each(elem => {
 				var nodes = elem.parentNode.childNodes;
 				nodes = W(nodes).filter(function(node){
-					if (!selector || (node == elem && hasOwn)) return true;
-					else if (typeof selector == "string"){                      //字符串
+					if (!selector) return true;
+					if (node == elem) {
+						if (hasOwn) return true;
+						else        return false;
+					}else if (typeof selector == "string"){                      //字符串
 						if (Wo.matches(node, selector))
 							 return true;
 						else return false;
@@ -122,9 +129,9 @@
 					}                            
 					
 				});
-				log(nodes)
+				dom.push(...nodes)
 			});
-
+			return W(T.unique(dom))
 		},
 		children(selector){
 			var dom = [];
@@ -270,7 +277,7 @@
 	
 	window.$ = window.$ || W; 
 
-	log(W(".a").siblings([".i"]));
+	log(W(".a, .j").siblings([".i"], true));
 
 
 }) )
