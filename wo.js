@@ -34,6 +34,7 @@
 		isNumber: (value) => T.type(value) == "number",
 		isObject: (value) => typeof value == "object",
 		isArray: (value) => T.type(value) == "array",
+		isBoolean: (value) => T.type(value) == "boolean",
 		isElemNode: (value) => !!value && typeof value == "object" && (value.nodeType == 1 || value.nodeType == 9),
 		toArray: (arr) => Array.from(arr),
 		likeArray(arr){
@@ -77,7 +78,7 @@
 			return T.toArray(this);
 		},
 		eq(index){
-
+			return this.slice(index, index+1)
 		},
 		slice(i, j){
 			return W(slice.call(this, i, j));
@@ -101,6 +102,29 @@
 				}
 			});
 			return W(T.unique(dom))
+		},
+		siblings(selector, hasOwn){
+			if (T.isBoolean(selector)) [selector, hasOwn] = [hasOwn, selector]  //重载
+			var dom = [];
+			this.each(elem => {
+				var nodes = elem.parentNode.childNodes;
+				nodes = W(nodes).filter(function(node){
+					if (!selector || (node == elem && hasOwn)) return true;
+					else if (typeof selector == "string"){                      //字符串
+						if (Wo.matches(node, selector))
+							 return true;
+						else return false;
+
+					}else if (T.isArray(selector)) {                            //数组,数组元素只能是字符串
+						if (selector.some((item) => Wo.matches(node, item)))
+							 return true;
+						else return false;
+					}                            
+					
+				});
+				log(nodes)
+			});
+
 		},
 		children(selector){
 			var dom = [];
@@ -136,8 +160,19 @@
 			})
 			return this;
 		},
+		removeClass(value){
+			this.each(elem => {
+				var reg = new RegExp("(^|\\s)"+value+"($|\\s)", "g") ;
+				elem.className = elem.className.replace(reg, "")
+			});
+			return this;
+		},
 		remove(){
-
+			this.each(elem => {
+				let parent = elem.parentNode || document;
+				parent.removeChild(elem)  
+			});
+			return this;
 		},
 		attr(key, value){
 			var attribute = (elem, key, value) =>{
@@ -235,7 +270,7 @@
 	
 	window.$ = window.$ || W; 
 
-	log(W("div").slice(2, 3));
+	log(W(".a").siblings([".i"]));
 
 
 }) )
