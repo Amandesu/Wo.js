@@ -34,7 +34,7 @@
 		isNumber: (value) => T.type(value) == "number",
 		isObject: (value) => typeof value == "object",
 		isArray: (value) => T.type(value) == "array",
-		isElemNode: (value) => !!value && typeof value == "object" && value.nodeType == 1,
+		isElemNode: (value) => !!value && typeof value == "object" && (value.nodeType == 1 || value.nodeType == 9),
 		toArray: (arr) => Array.from(arr),
 		likeArray(arr){
 			if(T.isArray(arr) == "array") return arr;
@@ -63,13 +63,40 @@
 		filter(fn){
 			return W(W.filter(this, fn));
 		},
+		get(){
+			return T.toArray(this);
+		},
+		parent(){
+			var dom = [];
+			this.each(elem => {
+				var parent = elem.parentNode || document;
+				if (dom.indexOf(parent) == -1){
+					dom.push(parent);
+				}
+			});
+			return W(dom)
+		},
+		parents(selector){
+			var dom = [];
+			this.each(elem => {
+				if (!selector) {
+					$(elem).parent()	
+				}
+				/* while(parentNode) {
+					if (Wo.matches)
+				} */
+			});
+		},
 		children(selector){
 			var dom = [];
 			this.each(elem => {
-				W(elem.childNodes).map(function(elem){
-
+				let nodes = elem.childNodes.length > 0 && W(elem.childNodes).filter(function(elem){
+					if(!selector) return elem;
+					else          return Wo.matches(elem, selector)
 				})
+				dom.push(...nodes);
 			})
+			return W(dom)
 		},
 		find(selector){
 			var type = T.type(selector);
@@ -193,9 +220,7 @@
 	
 	window.$ = window.$ || W; 
 
-	log(W("#parent, #child").filter(function(elem){
-		return W(elem).attr("cid") > 20
-	}));
+	log(W(".k, .m").get());
 
 
 }) )
