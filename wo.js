@@ -39,13 +39,23 @@
 		likeArray(arr){
 			if(T.isArray(arr) == "array") return arr;
 			return T.isObject(arr) && (arr.length === 0 || (T.isNumber(arr.length) && arr.length > 0 && !!arr[arr.length - 1]))
+		},
+		unique(arr){                    //数组去重
+			var obj = {}, newArr = [],
+				len = arr.length;
+			for (let i = 0; i < len; i++){
+				if (arr.slice(i+1).indexOf(arr[i]) == -1) 
+					newArr.push(arr[i])
+			}
+			return newArr;
 		}
 	}
 	var arrPro   = Array.prototype,
 		forEach  = arrPro.forEach,
 		map      = arrPro.map,
 		filter   = arrPro.filter,
-		push     = arrPro.push;
+		push     = arrPro.push,
+		slice    = arrPro.slice;
 	var W = function(selector, context){
 		return Wo.init(selector, context);
 	}
@@ -66,26 +76,31 @@
 		get(){
 			return T.toArray(this);
 		},
+		eq(index){
+
+		},
+		slice(i, j){
+			return W(slice.call(this, i, j));
+		},
 		parent(){
 			var dom = [];
-			this.each(elem => {
-				var parent = elem.parentNode || document;
-				if (dom.indexOf(parent) == -1){
-					dom.push(parent);
-				}
-			});
-			return W(dom)
+			this.each(elem => dom.push(elem.parentNode || document) );
+			return W(T.unique(dom))
 		},
 		parents(selector){
 			var dom = [];
 			this.each(elem => {
-				if (!selector) {
-					$(elem).parent()	
+				var parent = elem.parentNode;
+				while(parent) {
+					if (!selector)   dom.push(parent);
+					else 
+						if (Wo.matches(parent, selector)) 
+									 dom.push(parent);
+
+					parent = parent.parentNode;
 				}
-				/* while(parentNode) {
-					if (Wo.matches)
-				} */
 			});
+			return W(T.unique(dom))
 		},
 		children(selector){
 			var dom = [];
@@ -220,7 +235,7 @@
 	
 	window.$ = window.$ || W; 
 
-	log(W(".k, .m").get());
+	log(W("div").slice(2, 3));
 
 
 }) )
