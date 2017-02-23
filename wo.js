@@ -232,6 +232,7 @@
 				type = 3    
 			
 			function getDom(){
+				if (method == "insertBefore")
 				if (type == 1)       return W(value)[0].cloneNode(true);
 				else if (type == 2)  return value[0].cloneNode(true);
 				else if (type == 3)  return document.createTextNode(value);
@@ -249,9 +250,12 @@
 						elem.appendChild(dom)
 					}
 				} else if (method == "after") {
-					elem.parentNode.insertBefore(dom, elem.nextSibling)
+					elem.parentNode.insertBefore(dom, elem.nextSibling);
 				} else if (method == "before") {
-
+					elem.parentNode.insertBefore(dom, elem);
+				} else if (method == "insertAfter") {
+					if (type == 3) return;          //insertAfter后面必须接入元素节点
+					elem.parentNode.insertBefore(dom, elem.nextSibling);
 				}
 			});
 			return this;
@@ -267,6 +271,12 @@
 		},
 		after(value) {
 			return this.operator("after", value);
+		},
+		insertBefore(value){
+			return this.operator("insertBefore", value);
+		},
+		insertAfter(value) {
+			return this.operator("insertAfter", value);
 		},
 		html(value){
 			if (!this.length) return this; 
@@ -406,7 +416,7 @@
 
 
 	window.$ = window.$ || W; 
-	log(W("#ads div").after("mmmm") );
+	log(W(".a").insertAfter(W("#ads")));
 	//log(W(".j").siblings(true));
 
 
