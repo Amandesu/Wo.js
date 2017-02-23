@@ -92,7 +92,7 @@
 			var dom = [];
 			this.each(elem => {
 				var parent = elem.parentNode;
-				while(parent) {
+				while (parent) {
 					if (!selector)   dom.push(parent);
 					else 
 						if (Wo.matches(parent, selector)) 
@@ -103,26 +103,53 @@
 			});
 			return W(T.unique(dom))
 		},
-		closest(selector, context){
-
-
+		closest(selector, context){         
+			var dom = [],
+				endNode = context;
+			if (context) {
+				if (typeof context == "string" || T.isElemNode(context))              
+					endNode = W(context);
+				else if (!Wo.isW(context)) 
+					throw new Error("closest方法传入错误的参数")
+				endNode = endNode[0];
+			}
+			
+			this.each(elem => {
+				var parent = elem;       
+				while (parent) {
+					if (!selector) {
+						dom.push(parent);
+					} else if (typeof selector == "string") {
+						if (Wo.matches(parent, selector)){
+							dom.push(parent)
+						}
+					} else if (T.isArray(selector)) {
+						if (selector.some(elem => Wo.matches(parent, selector)))
+							dom.push(parent);
+					}
+					if (endNode == parent) break;
+					parent = parent.parentNode;
+				}
+			});
+			return W(T.unique(dom));
 		},
 		siblings(selector, hasOwn){
-			if (T.isBoolean(selector)) [selector, hasOwn] = [hasOwn, selector]  //重载
+			if (T.isBoolean(selector)) [selector, hasOwn] = [hasOwn, selector]  
 			var dom = [];
 			this.each(elem => {
 				var nodes = elem.parentNode.childNodes;
 				nodes = W(nodes).filter(function(node){
-					if (!selector) return true;
 					if (node == elem) {
-						if (hasOwn) return true;
+						if (hasOwn) return true;                              
 						else        return false;
-					}else if (typeof selector == "string"){                      //字符串
+					}
+					if (!selector) return true;                        		                       
+					if (typeof selector == "string"){                         
 						if (Wo.matches(node, selector))
 							 return true;
 						else return false;
 
-					}else if (T.isArray(selector)) {                            //数组,数组元素只能是字符串
+					}else if (T.isArray(selector)) {                            
 						if (selector.some((item) => Wo.matches(node, item)))
 							 return true;
 						else return false;
@@ -156,10 +183,7 @@
 			return W(dom);
 		},
 		not(selector) {
-			var type = T.type(selector);
-			if (type == "string") {
-
-			}
+			
 		},
 		addClass(value = ""){
 			this.each(elem => {
@@ -237,6 +261,23 @@
 				this[len] = keys[len];
 			}
 		},
+		isW(ctx){
+			return ctx instanceof Wo.W;
+		},
+		contains(parent, node){
+			var contain = document.documentElement.contains ? function(parent, node){
+					return parent.contains(node);
+				} : function(parent, node) {
+					var parentNode = node;
+					while (parentNode){
+						if (parentNode == parent) 
+							return true
+						parentNode = parentNode.parentNode;
+					}
+					return false
+				} 
+			return contain(parent, node);
+		},	
 		flagElement(selector, context){
 			let isSimple = false;
 
@@ -276,8 +317,8 @@
 	Wo.W.prototype = W.fn
 	
 	window.$ = window.$ || W; 
-
-	log(W(".a, .j").siblings([".i"], true));
+	log(W("p").closest("#child"));
+	//log(W(".j").siblings(true));
 
 
 }) )
