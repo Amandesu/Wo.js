@@ -21,9 +21,7 @@
 	 *@namespace tool
 	 */
 	const flagElemRE = /\s*<([\w]+)[^>]*>\s*/i;   
-	const simpleRE  = /^[_a-zA-Z](\w)*$/i;
-
-	
+	const simpleRE   = /^[_a-zA-Z$](\w)*$/i;
 	var T = {
 		type(value){
 			var exp = toString.call(value);
@@ -49,7 +47,32 @@
 					newArr.push(arr[i])
 			}
 			return newArr;
-		}
+		},
+		html: function(){
+			var html_encode = {
+	            '&' : '&amp;',
+	            '"' : '&quot;',
+	            '<' : '&lt;',
+	            '>' : '&gt;',
+	            ' '    : '&nbsp;',	
+	            "'"    : '&#39;'
+        	};
+        	var encode = function(html){
+        		for (var key in html_encode) {
+        			var reg = new RegExp(key, "g");
+        			html = html.replace(reg, html_encode[key]);
+        		}
+        		return html;
+        	};
+        	var decode = function(){
+
+        	};
+        	return {
+        		encode: encode,
+        		decode: decode,
+        	};
+
+		}()
 	}
 	var arrPro   = Array.prototype,
 		forEach  = arrPro.forEach,
@@ -183,7 +206,7 @@
 			return W(dom);
 		},
 		not(selector) {
-			
+
 		},
 		addClass(value = ""){
 			this.each(elem => {
@@ -195,6 +218,70 @@
 			this.each(elem => {
 				var reg = new RegExp("(^|\\s)"+value+"($|\\s)", "g") ;
 				elem.className = elem.className.replace(reg, "")
+			});
+			return this;
+		},
+		operator(method, value){
+			var dom = value, type = 3;
+			if (!value) return this;
+			if (typeof value == "string" && W(value).length > 0) 
+				type = 1
+			else if (Wo.isW(value)) 
+				type = 2   
+			else 
+				type = 3    
+			
+			function getDom(){
+				if (type == 1)       return W(value)[0].cloneNode(true);
+				else if (type == 2)  return value[0].cloneNode(true);
+				else if (type == 3)  return document.createTextNode(value);
+			}
+			
+			this.each(elem => {
+				dom = getDom()                     //生成dom节点
+				var childs = W(elem).children();
+				if (method == "append") {
+					elem.appendChild(dom);
+				} else if (method == "prepend") {
+					if (childs.length > 0) {
+						elem.insertBefore(dom, childs[0])
+					} else {
+						elem.appendChild(dom)
+					}
+				} else if (method == "after") {
+					elem.parentNode.insertBefore(dom, elem.nextSibling)
+				} else if (method == "before") {
+
+				}
+			});
+			return this;
+		},
+		append(value){
+			return this.operator("append", value);
+		},
+		prepend(value){
+			return this.operator("prepend", value);
+		},
+		before(value) {
+			return this.operator("before", value);
+		},
+		after(value) {
+			return this.operator("after", value);
+		},
+		html(value){
+			if (!this.length) return this; 
+			if (!value)       return this[0].innerHTML;
+
+			this.each(elem => {
+				elem.innerHTML = value;				
+			});
+			return this;
+		},
+		text(value){
+			if (!this.length) return this;
+			if (!value)       return this[0].innerText;
+			this.each(elem => {
+				elem.innerHTML = T.html.encode(value);
 			});
 			return this;
 		},
@@ -288,8 +375,8 @@
 				mayClass = !mayId && firstEle == ".",
 				match    = (!mayId && !mayClass) ? selector : selector.slice(1),
 				isSimple = simpleRE.test(match),
-				dom;
-
+				dom = [];
+			if (/^[1-9]$/.test(firstEle)) return dom;
 			if (isSimple) {
 				if (mayId && match) 			dom = document.getElementById(match);
 				else if (mayClass && match) 	dom = context.getElementsByClassName(match)
@@ -314,10 +401,12 @@
 			else  return false;
 		}
 	};
-	Wo.W.prototype = W.fn
-	
+	W.fn.constructor = Wo.W; 
+	Wo.W.prototype   = W.fn;
+
+
 	window.$ = window.$ || W; 
-	log(W("p").closest("#child"));
+	log(W("#ads div").after("mmmm") );
 	//log(W(".j").siblings(true));
 
 
