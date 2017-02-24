@@ -303,20 +303,35 @@
 			if (!value) return this[0].style[property];
 
 		},
-
-		width(value){
-			if (!value) return this[0].offsetWidth;
-			var exec = /^([1-9]\d{0,3})(?:px)*$/.exec(value);
-			if (exec) {
-				value = exec[1] + "px";
+		style(property, value){
+			if (!value) {
+				let node = this[0], res;
+				if (property == "width") 
+					res = node.offsetWidth;
+				else if (property == "height") 
+					res = node.offsetHeight;
+				else {
+					res = node.style[property]
+				}
+				return res.replace(/px/g, "");
+			} else {
 				this.each(elem => {
-					elem.style.width = value;
-				}) 
+					elem.style[property] = value.replace(/px/g, "") + "px";
+				});
 			}
 			return this;
 		},
+		width(value){
+			this.style("width", value)
+		},
 		height(value){
-
+			this.style("height", value)
+		},
+		left(value){
+			this.style("left", value)
+		},
+		right(value){
+			this.style("right", value)
 		},
 		offset(){
 			var left = 0, top = 0;
@@ -346,6 +361,7 @@
 	}
 	W.prototype = W.fn;
     //节点操作 appebd prepend after before insertAfter insertBefore
+    //除了append 暂时只接受单个节点的传入
 	function operator(method, value){
 		var dom = value, type = 3 ,self = this;
 		if (!value) return this;
@@ -363,11 +379,11 @@
 			if (method == "append") {
 				dom.each(node => elem.appendChild(node));
 			} else if (method == "prepend") {
-				if (childs.length > 0)         elem.insertBefore(dom, childs[0])
-				else                           elem.appendChild(dom)
+				if (childs.length > 0)         elem.insertBefore(dom[0], childs[0])
+				else                           elem.appendChild(dom[0])
 			
-			} else if (method == "after") {    elem.parentNode.insertBefore(dom, elem.nextSibling);
-			} else if (method == "before") {   elem.parentNode.insertBefore(dom, elem);
+			} else if (method == "after") {    elem.parentNode.insertBefore(dom[0], elem.nextSibling);
+			} else if (method == "before") {   elem.parentNode.insertBefore(dom[0], elem);
 			} else if (method == "insertAfter") {
 				if (type !== 3)                W(value).after(self[0]);
 			} else if (method == "insertBefore") {
@@ -469,7 +485,7 @@
 	Wo.W.prototype   = W.fn;
 
 	W("#block").on("click", function(){
-		log(W(this).append(W("#block")));
+		log(W(this).left("200"));
 	})
 	return W;	
 	//log(W(".j").siblings(true));
