@@ -49,21 +49,21 @@
 			return newArr;
 		},
 		html: function(){
-			var html_encode = {
-	            '&' : '&amp;',
-	            '"' : '&quot;',
-	            '<' : '&lt;',
-	            '>' : '&gt;',
-	            ' '    : '&nbsp;',	
-	            "'"    : '&#39;'
-        	};
-        	var encode = function(html){
-        		for (var key in html_encode) {
-        			var reg = new RegExp(key, "g");
-        			html = html.replace(reg, html_encode[key]);
-        		}
-        		return html;
-        	};
+
+			var encode = function(content){
+				var escapeMap = {
+				    "<": "&#60;",
+				    ">": "&#62;",
+				    '"': "&#34;",
+				    "'": "&#39;",
+				    "&": "&#38;"
+				};
+				return String(content).replace(/&(?![\w#]+;)|[<>"']/g, function(s){
+				    return escapeMap[s]
+				});
+					
+			}
+		
         	var decode = function(){
 
         	};
@@ -79,14 +79,15 @@
 		map      = arrPro.map,
 		filter   = arrPro.filter,
 		push     = arrPro.push,
-		slice    = arrPro.slice;
+		slice    = arrPro.slice,
+		some     = arrPro.some;
 	var W = function(selector, context){
 		return Wo.init(selector, context);
 	}
 	W.map    = (dom, fn) => map.call(dom, fn);
 	W.each   = (dom, fn) => forEach.call(dom, fn);
 	W.filter = (dom, fn) => filter.call(dom, fn);
-
+	W.some   = (dom, fn) => some.call(dom, fn);
 	W.fn = {
 		map(fn){
 			return W(W.map(this, fn));
@@ -96,6 +97,9 @@
 		},
 		filter(fn){
 			return W(W.filter(this, fn));
+		},
+		some(fn){
+			return W.some(this, fn);
 		},
 		get(){
 			return T.toArray(this);
@@ -206,9 +210,24 @@
 			return W(dom);
 		},
 		not(selector) {
-
+			var dom = [], nodes;
+			if (typeof selector == "function") {
+				let domTemp = this.filter(selector);
+				return this.not(domTemp);
+			} else if ((nodes = W(selector)).length > 0) {
+				this.filter(elem => {
+					if(
+						nodes.get().every(function(node){
+							return elem !== node
+						})
+					)  dom.push(elem)
+				})
+				return W(dom);
+			}
 		},
 		addClass(value = ""){
+			var classes = [];
+
 			this.each(elem => {
 				elem.className += " " + value
 			})
@@ -221,62 +240,23 @@
 			});
 			return this;
 		},
-		operator(method, value){
-			var dom = value, type = 3;
-			if (!value) return this;
-			if (typeof value == "string" && W(value).length > 0) 
-				type = 1
-			else if (Wo.isW(value)) 
-				type = 2   
-			else 
-				type = 3    
-			
-			function getDom(){
-				if (method == "insertBefore")
-				if (type == 1)       return W(value)[0].cloneNode(true);
-				else if (type == 2)  return value[0].cloneNode(true);
-				else if (type == 3)  return document.createTextNode(value);
-			}
-			
-			this.each(elem => {
-				dom = getDom()                     //生成dom节点
-				var childs = W(elem).children();
-				if (method == "append") {
-					elem.appendChild(dom);
-				} else if (method == "prepend") {
-					if (childs.length > 0) {
-						elem.insertBefore(dom, childs[0])
-					} else {
-						elem.appendChild(dom)
-					}
-				} else if (method == "after") {
-					elem.parentNode.insertBefore(dom, elem.nextSibling);
-				} else if (method == "before") {
-					elem.parentNode.insertBefore(dom, elem);
-				} else if (method == "insertAfter") {
-					if (type == 3) return;          //insertAfter后面必须接入元素节点
-					elem.parentNode.insertBefore(dom, elem.nextSibling);
-				}
-			});
-			return this;
-		},
 		append(value){
-			return this.operator("append", value);
+			return operator.call(this, "append", value);
 		},
 		prepend(value){
-			return this.operator("prepend", value);
+			return operator.call(this, "prepend", value);
 		},
 		before(value) {
-			return this.operator("before", value);
+			return operator.call(this, "before", value);
 		},
 		after(value) {
-			return this.operator("after", value);
+			return operator.call(this, "after", value);
 		},
 		insertBefore(value){
-			return this.operator("insertBefore", value);
+			return operator.call(this, "insertBefore", value);
 		},
 		insertAfter(value) {
-			return this.operator("insertAfter", value);
+			return operator.call(this, "insertAfter", value);
 		},
 		html(value){
 			if (!this.length) return this; 
@@ -318,9 +298,84 @@
 				attribute(elem, key, value);
 			});
 			return this;			
+		},
+		css(property, value){
+			if (!value) return this[0].style[property];
+
+		},
+
+		width(value){
+			if (!value) return this[0].offsetWidth;
+			var exec = /^([1-9]\d{0,3})(?:px)*$/.exec(value);
+			if (exec) {
+				value = exec[1] + "px";
+				this.each(elem => {
+					elem.style.width = value;
+				}) 
+			}
+			return this;
+		},
+		height(value){
+
+		},
+		offset(){
+			var left = 0, top = 0;
+		    var offsetParent = this[0];  
+		    while (offsetParent != null && offsetParent != document.body)  {  
+		        left  += offsetParent.offsetLeft;
+		        top += offsetParent.offsetTop;  
+		        offsetParent = offsetParent.offsetParent;  
+		    }  
+		    return {
+		    	left  : left,
+		    	top   : top
+		    }
+				
+		},
+		position(){
+
+		},
+		on(event, fn) {
+			this.each(elem => {
+				function proxy(){
+					fn.apply(elem)
+				}
+				elem.addEventListener(event, proxy)
+			})
 		}
 	}
 	W.prototype = W.fn;
+    //节点操作 appebd prepend after before insertAfter insertBefore
+	function operator(method, value){
+		var dom = value, type = 3 ,self = this;
+		if (!value) return this;
+		if (W(value).length > 0)  type = 1
+		else if (Wo.isW(value))   type = 2   
+		else                       type = 3    
+		function getDom(){
+			if (type == 1)       return W(value).map(elem => elem.cloneNode(true));
+			else if (type == 2)  return value[0].cloneNode(true);
+			else if (type == 3)  return document.createTextNode(value);
+		}
+		this.each(elem => {
+			dom = getDom()                     //生成dom节点
+			var childs = W(elem).children();
+			if (method == "append") {
+				dom.each(node => elem.appendChild(node));
+			} else if (method == "prepend") {
+				if (childs.length > 0)         elem.insertBefore(dom, childs[0])
+				else                           elem.appendChild(dom)
+			
+			} else if (method == "after") {    elem.parentNode.insertBefore(dom, elem.nextSibling);
+			} else if (method == "before") {   elem.parentNode.insertBefore(dom, elem);
+			} else if (method == "insertAfter") {
+				if (type !== 3)                W(value).after(self[0]);
+			} else if (method == "insertBefore") {
+				if (type !== 3)                W(value).before(self[0]);
+			}
+		});
+		return this;
+	}
 	var Wo = {
 		init(selector, context){
 			var type = T.type(selector), dom = [];
@@ -330,15 +385,14 @@
 					this.flagElement(selector, context)
 			    else 
 					dom = this.qsa(selector.trim(), context)
-			}  else if(T.likeArray(selector)) {
+			}  else if(T.likeArray(selector)) {         //如果为类似数组
 
-				dom = T.toArray(selector).filter(function(elem){
+				T.toArray(selector).forEach(function(elem){
+					var nodes;
 					if (T.isElemNode(elem)){
-						return elem;
-					} else if(T.type(elem) == "string"){
-						return W.qsa(elem)
-					} else {
-						return false;
+						dom.push(elem);
+					} else if( (nodes = W(elem)).length > 0){
+						return dom.push(...nodes);
 					}
 				});
 			}  else if(T.isElemNode(selector)) {         //如果为dom节点
@@ -414,9 +468,10 @@
 	W.fn.constructor = Wo.W; 
 	Wo.W.prototype   = W.fn;
 
-
-	window.$ = window.$ || W; 
-	log(W(".a").insertAfter(W("#ads")));
+	W("#block").on("click", function(){
+		log(W(this).append(W("#block")));
+	})
+	return W;	
 	//log(W(".j").siblings(true));
 
 
