@@ -32,6 +32,7 @@
 		isNumber: (value) => T.type(value) == "number",
 		isObject: (value) => typeof value == "object",
 		isArray: (value) => T.type(value) == "array",
+		isFunction: (value) => typeof value == "function",
 		isBoolean: (value) => T.type(value) == "boolean",
 		isElemNode: (value) => !!value && typeof value == "object" && (value.nodeType == 1 || value.nodeType == 9),
 		toArray: (arr) => Array.from(arr),
@@ -84,6 +85,8 @@
 	var W = function(selector, context){
 		return Wo.init(selector, context);
 	}
+
+	//DOM操作
 	W.map    = (dom, fn) => map.call(dom, fn);
 	W.each   = (dom, fn) => forEach.call(dom, fn);
 	W.filter = (dom, fn) => filter.call(dom, fn);
@@ -349,14 +352,6 @@
 		},
 		position(){
 
-		},
-		on(event, fn) {
-			this.each(elem => {
-				function proxy(){
-					fn.apply(elem)
-				}
-				elem.addEventListener(event, proxy)
-			})
 		}
 	}
 	W.prototype = W.fn;
@@ -484,9 +479,82 @@
 	W.fn.constructor = Wo.W; 
 	Wo.W.prototype   = W.fn;
 
-	W("#block").on("click", function(){
-		log(W(this).left("200"));
-	})
+	//事件集
+
+	/* var domEvents = ('focusin focusout focus blur load resize scroll unload click dblclick '+
+ 					'mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave '+
+  					'change select keydown keypress keyup error').split(" ");
+  	log(domEvents)
+	var Observer = function () {
+		this.events = {};
+	}
+	Observer.prototype.on    = function (name, callback) {
+		var events = this.events;
+		var handle = {};
+		if (!events[name]) 
+			events[name] = [callback];
+		else 
+			events[name].push(callback);
+		return this;
+	}
+	Observer.prototype.off    = function (name) {
+		var events = this.events;
+		if (events[name]) delete events[name];
+	}
+	Observer.prototype.notify = function (argument) {
+	}
+	var ob = new Observer(); */ 
+	
+	var cid = 0;
+	var handle = {
+
+	};
+	W.fn.on = function(eventType, selector, callback, data, once){
+		if (T.isFunction(selector)) {
+			once     = data
+			data     = callback;
+			callback = selector;
+			selector = null;
+		} else if (typeof selector !== "string") 
+			throw new Error("selectot参数不合法")
+		if (T.isBoolean(data))
+			[data, once] = [once, data]
+		this.each(elem => {
+			if (once) {
+				var onceFn = function(e) {
+					remove(elem, eventType, e.callback);
+					return callback.apply(elem, arguments);
+				}
+			} 
+			if (selector) {
+				var delagetor = function(e) {
+					var dom = W(e.target).closest(selector, elem).get();
+					return (onceFn || callback).apply(dom, arguments);
+				}
+			}
+			add(elem, eventType, selector, delagetor || onceFn || callback , data);
+		});
+		return this;
+	};
+	function add(elem, eventType, selector, callback, data) {
+		var proxy = function(e){
+			e.callback = proxy;
+			callback.call(elem, e);
+		};
+		eventType.split(" ").forEach(event => {
+			elem.addEventListener(event, proxy, false);
+		})	
+	}
+	function remove(elem, eventType, callback) {
+		eventType.split(" ").forEach(event => {
+			elem.removeEventListener(event,  callback, false)
+		})
+	}
+	//W(".child").on("click", function(){})
+	W(".child").on("click",".a", function(e){
+		log(e.target)
+	}, true)
+
 	return W;	
 	//log(W(".j").siblings(true));
 
