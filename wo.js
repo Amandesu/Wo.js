@@ -479,36 +479,36 @@
 	W.fn.constructor = Wo.W; 
 	Wo.W.prototype   = W.fn;
 
-	//事件集
+	
 
-	/* var domEvents = ('focusin focusout focus blur load resize scroll unload click dblclick '+
- 					'mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave '+
-  					'change select keydown keypress keyup error').split(" ");
-  	log(domEvents)
-	var Observer = function () {
+	//事件集 
+	var Handle = function(elem){
+		this.elem   = elem;
 		this.events = {};
-	}
-	Observer.prototype.on    = function (name, callback) {
+	};
+	Handle.prototype.add = function(type, callback, isProxy) {
 		var events = this.events;
-		var handle = {};
-		if (!events[name]) 
-			events[name] = [callback];
-		else 
-			events[name].push(callback);
+		if (!events[type]) {
+			events[type] = []
+		}
+		events[type].push(callback);
 		return this;
 	}
-	Observer.prototype.off    = function (name) {
-		var events = this.events;
-		if (events[name]) delete events[name];
-	}
-	Observer.prototype.notify = function (argument) {
-	}
-	var ob = new Observer(); */ 
-	
-	var cid = 0;
-	var handle = {
+	Handle.prototype.remove = function(type, callback) {
+		var events = this.events, index;
+		if (events[type]) {
+			if (!callback) 
+				delete events[type];
 
-	};
+			else {
+				index = events[type].indexOf(callback);
+				if (index > -1) {
+					events[type].splice(index, 1)
+				}
+			}
+		}
+		return this; 
+	}
 	W.fn.on = function(eventType, selector, callback, data, once){
 		if (T.isFunction(selector)) {
 			once     = data
@@ -519,42 +519,71 @@
 			throw new Error("selectot参数不合法")
 		if (T.isBoolean(data))
 			[data, once] = [once, data]
+		
 		this.each(elem => {
+			var onceFn, delagetor;
+			if (!elem.handle) {
+				elem.handle = new Handle(elem);
+			}
 			if (once) {
-				var onceFn = function(e) {
-					remove(elem, eventType, e.callback);
+				onceFn = function(e) {
+					remove(elem, eventType, proxyFn);
 					return callback.apply(elem, arguments);
 				}
 			} 
 			if (selector) {
-				var delagetor = function(e) {
+				delagetor = function(e) {
 					var dom = W(e.target).closest(selector, elem).get();
 					return (onceFn || callback).apply(dom, arguments);
-				}
+				}  
 			}
-			add(elem, eventType, selector, delagetor || onceFn || callback , data);
+			var proxy = function(callback) {
+				return function(e){
+					e.data = data;
+					e.elem = elem;
+					callback.call(elem, e);
+				}
+			};
+			var proxyFn = proxy(delagetor || onceFn || callback)
+			add(elem, eventType, selector, proxyFn , data);
+		});
+		return this;
+	};
+	W.fn.off = function(eventType, fn) {
+		this.each(elem => {
+			remove(elem, eventType, fn)
 		});
 		return this;
 	};
 	function add(elem, eventType, selector, callback, data) {
-		var proxy = function(e){
-			e.callback = proxy;
-			callback.call(elem, e);
-		};
 		eventType.split(" ").forEach(event => {
-			elem.addEventListener(event, proxy, false);
+			elem.handle.add(event, callback);	
+			elem.addEventListener(event, callback, false);
 		})	
 	}
 	function remove(elem, eventType, callback) {
 		eventType.split(" ").forEach(event => {
+			var handle = elem.handle;
+			if (!callback) {
+				let events = handle.events[eventType], len = events.length;
+				while(len--) {
+					handle.remove(event, callback);
+					elem.removeEventListener(event,  events[len], false)
+				}
+			}
 			elem.removeEventListener(event,  callback, false)
 		})
 	}
-	//W(".child").on("click", function(){})
-	W(".child").on("click",".a", function(e){
-		log(e.target)
-	}, true)
+	var a = function(e) {
+		log(e.data)
+	}
+	var b = function(e) {
+		log(e.data)
+	}
+	W(".child").on("click", ".a", a, 12, true);
+	W(".child").on("click", ".a", a, 13);
 
+	//W(".child").on("click", ".a", a, 12);
 	return W;	
 	//log(W(".j").siblings(true));
 
