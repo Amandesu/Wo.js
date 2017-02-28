@@ -481,7 +481,7 @@
 
 	
 
-	//事件集 
+	//事件
 	var Handle = function(elem){
 		this.elem   = elem;
 		this.events = {};
@@ -499,7 +499,6 @@
 		if (events[type]) {
 			if (!callback) 
 				delete events[type];
-
 			else {
 				index = events[type].indexOf(callback);
 				if (index > -1) {
@@ -551,7 +550,14 @@
 	};
 	W.fn.off = function(eventType, fn) {
 		this.each(elem => {
-			remove(elem, eventType, fn)
+			var events = elem.handle.events;
+			if (!eventType) {
+				for (var event in events) {
+					remove(elem, event, fn)
+				}
+			} else if(events[eventType]){
+				remove(elem, eventType, fn)
+			}	
 		});
 		return this;
 	};
@@ -574,16 +580,16 @@
 			elem.removeEventListener(event,  callback, false)
 		})
 	}
-	var a = function(e) {
-		log(e.data)
+	W(".child").on("click", function(){
+		log(e.elem)
+	})
+	//封装ajax
+	var ajax_defalut = {
+		method: "post"
 	}
-	var b = function(e) {
-		log(e.data)
-	}
-	W(".child").on("click", ".a", a, 12, true);
-	W(".child").on("click", ".a", a, 13);
+	W.fn.ajax = function(options){
 
-	//W(".child").on("click", ".a", a, 12);
+	}
 	return W;	
 	//log(W(".j").siblings(true));
 
