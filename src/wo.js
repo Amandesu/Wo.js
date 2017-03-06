@@ -585,18 +585,6 @@
 	})
 
 
-	//封装ajax
-	
-	//将对象转化为地址格式的字符串 {name:12, age 12}  => name=12&age=12
-	var isPlainObject = function(obj){
-		var type = toString.call(obj);
-		return type == "[object Object]";
-	}
-	var isArray = function(obj) {
-		var type = toString.call(obj);
-		return type == "[object Array]";
-	}
-	
 	var urlObj   = function(obj, key) {
 		var arr = [];
 		for (var name in obj) {
@@ -618,123 +606,7 @@
 		else
 			return url + "?" + urlObj(obj);
 	};
-	//解析JSON字符串
-	var parse = function (text) { //'{}'
-		var at = -1;
-		var ch = " ";
-		function next(str) {
-			if(str && str != ch) {
-				throw new Error(str+"不符合预期")
-			}
-			at++;
-			ch = text[at];
-			return ch;
-		}
-		function nextAll(str){
-			for(var i = 0; i < str.length; i++) {
-				next(str[i])
-			}
-		}
-		function white() {
-			while (ch && ch <= " ") {
-				next();
-			}
-		}
-		function literl(){
-			if (ch == "t") {
-				nextAll("true")
-				return true;
-			} else if (ch == "f") {
-				nextAll("false")
-				return false;
-			} else if (ch == "n") {
-				nextAll("null")
-				return null;
-			} else if (ch == "u") {
-				nextAll("undefined")
-				return undefined;
-			}
-		}
-		function string(){
-			var str = "";
-			while (next()) {
-				if (ch == '"') {
-					next('"')
-					return str;
-				} else {
-					str += ch;
-				}
-			}
-		}
-		function number(){
-			var str = ch;
-			while(next()){
-				if(/\d|\./.test(ch)){
-					str += ch;
-				} else {
-					return str;
-				}
-			}
-		}
-		function array() {
-			var arr = [], value;
-			next("[");
-			if (ch == "]") {
-				return arr;
-			} else {
-				while (ch) {
-					white();
-					value = start();
-					arr.push(value);
-					white();
-					if (ch == "]") {
-						next(']');
-						return arr;
-					}
-					next(",")
-				}
-			}
-		}
-		function object() {
-			var obj = {}, key;
-			next("{");
-			if (ch == "}") {
-				return obj;
-			} else {
-				while (ch) {
-					white();
-					key = string()
-					white();
-					next(":");
-					white();
-					obj[key] = start();
-					white();
-					if (ch === '}') {
-						next('}');
-						return obj;
-					}
-					next(',');
-				}
-			}
-		}
-		function start() {
-			white();
-			if (ch == "{") 
-				return object();
-			else if (/\d|-/.test(ch))
-				return number();
-			else if (ch == "["){
-				return array();
-			}
-			else if (ch == '"'){
-				return string();
-			}
-			else if (ch == "t" || ch == "f" || ch == "n" || ch == "u") {
-				return literl();
-			}
-		}
-		return start();
-	}
+	
 
 	//解析JSON对象
 	var stringfiy = function(obj) {
@@ -870,34 +742,7 @@
 		}
 
 	})
-	function stringfiy() {
-		
-	}
-	function parseOwn(text){
-		var obj = null
-		try {
-			obj = JSON.parse(text)
-		}
-		catch(err) {
-			if (err) {
-				try {
-					obj = parse(text); 
-				}
-				catch (err){
-					try {
-						if (/^\s*\{/.test(text)) {
-                    		text = "(" + text + ")";
-                		}
-                		obj = eval(text);
-					}
-					catch (err) {
-						return error + "解析错误";
-					}
-				}	
-			}
-		}
-		return obj
-	}
+
 	return W;	
 	//log(W(".j").siblings(true));
 

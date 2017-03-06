@@ -81,34 +81,33 @@ function unique(arr){
 				newArr.push(arr[i])
 		}
 	}
-	map.clear()
+	map || map.clear()
 	return newArr;
 }
-export {type, isPlainObject, toArray, unique}
-/*
-		html: function(){
+var escapeMap =  {
+	    "<": "&#60;",
+	    ">": "&#62;",
+	    '"': "&#34;",
+	    "'": "&#39;",
+	    "&": "&#38;"
+};
+function encode(text) {
+	return String(text).replace(/&(?![\w#]+;)|[<>"']/g, function(s){
+		return escapeMap[s]
+	});
+}
 
-			var encode = function(content){
-				var escapeMap = {
-				    "<": "&#60;",
-				    ">": "&#62;",
-				    '"': "&#34;",
-				    "'": "&#39;",
-				    "&": "&#38;"
-				};
-				return String(content).replace(/&(?![\w#]+;)|[<>"']/g, function(s){
-				    return escapeMap[s]
-				});
-					
-			}
-		
-        	var decode = function(){
-
-        	};
-        	return {
-        		encode: encode,
-        		decode: decode,
-        	};
-
-		}()
-	}*/
+export { 
+		 type         , 
+		 isPlainObject, 
+	     isNumber     , 
+	     isObject     , 
+	     isArray      , 
+	     isFunction   , 
+	     isBoolean    ,
+	     isElemNode   , 
+	     toArray      , 
+	     likeArray    ,  
+	     unique       , 
+	     encode
+	   };
