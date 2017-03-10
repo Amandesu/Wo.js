@@ -132,7 +132,7 @@
      *@return {string}       字符串
       example
 	       parseOwn({name: "leiwuyi", "age": [1, 2, 3, 4, 5], isOk: true})
-		   return '{name : "leiwuyi", age  : [1, 2, 3, 4, 5],isOk: true}'
+		   return '{name : "leiwuyi", age  : [1, 2, 3, 4, 5], isOk: true}'
      */
 	function stringfiyOwn(obj) {
 

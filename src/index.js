@@ -1,4 +1,4 @@
-import {
-	type, isPlainObject, toArray
-}   from './tool'
-export {type, isPlainObject, toArray};
+import {W} from  "./w"
+import  "./find"
+import  "./operate"
+export {W}

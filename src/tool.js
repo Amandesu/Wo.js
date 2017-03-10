@@ -22,7 +22,7 @@ function isFunction(value) {
 function isBoolean(value) {
 	return type(value) == "boolean";
 }
-/** 判断是否为元素节点或者文本节点
+/** 判断是否为元素节点或者文档节点
  *return{Booearn} 
  */
 function isElemNode(value) {
