@@ -136,8 +136,7 @@ import {
 				} else {
 				    return Wo.matches(node, selector)
 				}
-			})
-			log(nodes)
+			}) 
 			dom.push(...nodes);
 		})
 		return W(dom)
@@ -149,8 +148,8 @@ import {
 	lastChild(){
 		var dom = [];
 		this.each(elem => {
-			var elem = W(elem);
-			push.apply(dom, elem.children(elem.length-1))
+			var elem = W(elem).children();
+			push.call(dom, elem[elem.length-1])
 		})
 		return W(dom);
 	},
@@ -182,6 +181,21 @@ import {
 	slice(i, j){
 		return W(slice.call(this, i, j));
 	},
+	/** 获得下一个元素
+	 *@param{Number} index 索引  
+	 */
+	next(){
+		var dom = [];
+		this.each(node => {
+			var nextNode = node.nextSibling ;
+			while(nextNode && nextNode.nodeType != 1) {
+				nextNode = nextNode.nextSibling;
+			};
+			if (nextNode && nextNode.nodeType == 1) 
+				dom.push(nextNode)
+		});
+		return W(unique(dom));
+	},
 	/** 获得元素集合中的最后一个元素
 	 *@param{Number} index 索引  
 	 */
@@ -196,9 +210,9 @@ import {
 		if (typeof selector == "function") {
 			let domTemp = this.get().filter(selector)
 			return this.not(domTemp);
-		} else if (isArray(selector)) {
-			nodes = W(selector);
-			this.filter(elem => {
+		} else if ((nodes = W(selector)).length > 0) {
+			
+			this.get().filter(elem => {
 				if(
 					nodes.get().every(function(node){
 						return elem !== node
@@ -209,6 +223,7 @@ import {
 		} else if (selector == undefined) {
 			return this;
 		}
+		return this;
 	},
 	/** 从匹配的元素集合中获取指定的元素。
 	 *@param{String} selector 选择器  

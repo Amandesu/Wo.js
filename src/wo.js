@@ -12,8 +12,9 @@ import {
 
 import { W
 } from "./w"
-const flagElemRE = /\s*<([\w]+)[^>]*>\s*/i;   
-const simpleRE   = /^[_a-zA-Z$](\w)*$/i;
+const flagElemRE  = /\s*<([a-zA-Z]+)[^>]*>/g;   
+const singleTagRE = /^\s*<(\w+)\s*\/?>(?:<\/\1>|)\s*$/
+const simpleRE    = /^[_a-zA-Z$](\w)*$/i;
 
 var Wo = {
 	/**  初始化选择器
@@ -25,8 +26,8 @@ var Wo = {
 		var sType = type(selector), 
 		    dom = [];
 		if (sType == "string") {
-			if(flagElemRE.test(selector)) 
-				this.flagElement(selector, context)
+			if(Wo.isFlagElem(selector)) 
+				dom = this.createElement(selector, context)
 		    else 
 				dom = this.qsa(selector.trim(), context)
 		} else if(likeArray(selector)) {         //如果为类似数组
@@ -91,9 +92,20 @@ var Wo = {
 			} 
 		return contain(parent, node);
 	},	
-	flagElement(selector, context){
-		let isSimple = false;
-
+	isFlagElem(str){
+		return flagElemRE.test(str)
+	},
+	createElement(str){
+		var dom = [];
+		if(singleTagRE.test(str)){
+			return document.createElement(RegExp.$1)
+		}
+		var container = document.createElement("div");
+		container.innerHTML = str;
+		W(container).children().each(function(elem){
+			dom.push(container.removeChild(elem));
+		})
+		return dom;		
 	},
 	/** 匹配选择器
 	 *@param{String}    selector 选择器

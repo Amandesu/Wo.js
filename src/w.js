@@ -18,9 +18,24 @@ var arrPro   = Array.prototype,
 	push     = arrPro.push,
 	slice    = arrPro.slice,
 	some     = arrPro.some;
-W.map    = (dom, fn) => map.call(dom, fn);
-W.each   = (dom, fn) => forEach.call(dom, fn);
-W.some   = (dom, fn) => some.call(dom, fn);
+W.map    = (dom, fn) => {
+	map.call(dom, function(elem, i){
+		fn.call(dom, elem, i)
+	});
+	return dom;
+}
+W.each   = (dom, fn) => {
+	forEach.call(dom, function(elem, i){
+		fn.call(dom, elem, i)
+	});
+	return dom;
+} 
+W.some   = (dom, fn) => {
+	some.call(dom, function(elem, i){
+		fn.call(dom, elem, i)
+	});
+	return dom;
+}
 
 //扩展静态属性
 W.extendProp = function(options, cover) {
@@ -91,8 +106,10 @@ W.fn = {
 	},
 	remove(){
 		this.each(elem => {
-			let parent = elem.parentNode || document;
-			parent.removeChild(elem)  
+			let parent = elem.parentNode;
+			if (parent) {
+				parent.removeChild(elem)
+			}	  
 		});
 		return this;
 	},

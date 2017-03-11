@@ -22,11 +22,11 @@ function isFunction(value) {
 function isBoolean(value) {
 	return type(value) == "boolean";
 }
-/** 判断是否为元素节点或者文档节点
+/** 判断是否为元素节点或者文档节点 文本节点
  *return{Booearn} 
  */
 function isElemNode(value) {
-	return !!value && typeof value == "object" && (value.nodeType == 1 || value.nodeType == 9);
+	return !!value && typeof value == "object" && ([1, 9].indexOf(value.nodeType) >= 0);
 }
 /** 转化为数组
  *@param{*} value 类似数组
