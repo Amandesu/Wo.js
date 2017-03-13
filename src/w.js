@@ -4,7 +4,8 @@ import {
 	unique,
 	toArray,
 	isElemNode,
-	isBoolean
+	isBoolean,
+	isObject
 
 } from  "./tool"
 
@@ -58,6 +59,25 @@ W.extendProp = function(options, cover) {
 W.extend = function(options, cover) {
 	return W.extendProp.call(W.fn, options, cover)
 }
+/** 属性的拷贝
+ *@param{Object}   target目标对象
+ *@param{Object}   source被拷贝的对象
+ *@param{Boolean}  是否为深度拷贝
+ *@param{Boolean}  是否覆盖相同属性
+ */
+W.copy = function(target, source, deep, copy) {
+	for (var name in source) {
+		if (target[name] !== undefined && !copy) 
+			continue; 
+		if (!isObject(source[name]) || !deep) {
+			target[name] = source[name];
+		} else {
+			target[name] = {};
+			W.copy(target[name], source[name]);
+		}
+	}
+	return target;
+};
 W.fn = {
 	constructor: W,
 	map(fn){
@@ -71,107 +91,6 @@ W.fn = {
 	},
 	get(){
 		return toArray(this);
-	},
-	addClass(value = ""){
-		var classes = [];
-
-		this.each(elem => {
-			elem.className += " " + value
-		})
-		return this;
-	},
-	removeClass(value){
-		this.each(elem => {
-			var reg = new RegExp("(^|\\s)"+value+"($|\\s)", "g") ;
-			elem.className = elem.className.replace(reg, "")
-		});
-		return this;
-	},
-	html(value){
-		if (!this.length) return this; 
-		if (!value)       return this[0].innerHTML;
-
-		this.each(elem => {
-			elem.innerHTML = value;				
-		});
-		return this;
-	},
-	text(value){
-		if (!this.length) return this;
-		if (!value)       return this[0].innerText;
-		this.each(elem => {
-			elem.innerHTML = T.html.encode(value);
-		});
-		return this;
-	},
-	remove(){
-		this.each(elem => {
-			let parent = elem.parentNode;
-			if (parent) {
-				parent.removeChild(elem)
-			}	  
-		});
-		return this;
-	},
-	attr(key, value){
-		var attribute = (elem, key, value) =>{
-			if (!isElemNode(elem)) return;
-			if (!value) {
-				return elem.getAttribute(key);
-			} else {
-				elem.setAttribute(key, value);
-			}
-		} 
-		if (!value) {
-			return attribute(this[0], key);
-		}
-		this.each(function(elem, i){
-			attribute(elem, key, value);
-		});
-		return this;			
-	},
-	style(property, value){
-		if (!value) {
-			let node = this[0], res;
-			if (property == "width") 
-				res = node.offsetWidth;
-			else if (property == "height") 
-				res = node.offsetHeight;
-			else {
-				res = node.style[property]
-			}
-			return res.replace(/px/g, "");
-		} else {
-			this.each(elem => {
-				elem.style[property] = value.replace(/px/g, "") + "px";
-			});
-		}
-		return this;
-	},
-	width(value){
-		this.style("width", value)
-	},
-	height(value){
-		this.style("height", value)
-	},
-	left(value){
-		this.style("left", value)
-	},
-	right(value){
-		this.style("right", value)
-	},
-	offset(){
-		var left = 0, top = 0;
-	    var offsetParent = this[0];  
-	    while (offsetParent != null && offsetParent != document.body)  {  
-	        left  += offsetParent.offsetLeft;
-	        top   += offsetParent.offsetTop;  
-	        offsetParent = offsetParent.offsetParent;  
-	    }  
-	    return {
-	    	left  : left,
-	    	top   : top
-	    }			
 	}
 }
 W.prototype = W.fn;

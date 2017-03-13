@@ -91,6 +91,12 @@ var escapeMap =  {
 	    "'": "&#39;",
 	    "&": "&#38;"
 };
+/**对html字符串进行编码  
+ *@param{String} text  文本字符串
+  @example
+    encode("<div></div>")
+    return "&#60;div&#62;&#60;/div&#62;"
+ */
 function encode(text) {
 	return String(text).replace(/&(?![\w#]+;)|[<>"']/g, function(s){
 		return escapeMap[s]
