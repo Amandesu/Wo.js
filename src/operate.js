@@ -5,13 +5,7 @@
  import {Wo} from "./wo"
  import {encode} from "./tool"
  import "./find"
-/* "append prepend, beofore after insertBefore insertAfter".split(" ").forEach(
-	function(method) {
-		W.fn[method] = function() {
-			return operator.call(this, method, value);
-		}
-	}
-) */
+ 
 W.extend({
 	/** 在每个匹配元素里面的末尾处插入参数内容  
 	 *@param{String|HTML DOM} value    可以是字符串也可以是dom节点,也可以是W节点

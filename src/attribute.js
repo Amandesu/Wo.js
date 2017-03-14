@@ -184,5 +184,31 @@
  			left  : left,
  			top   : top
  		}
+ 	},
+ 	/** 获取匹配元素中第一个元素的当前坐标，相对于offset parent的坐标。  
+     *@return{Object}
+     */
+ 	position(){
+ 		var type = this.css("position"),
+ 			elem = this[0];
+ 		if (type == "absolute" || type == "fixed") {
+ 			return {
+ 				left: this.css("left").replace("px", ""),
+ 				top : this.css("top").replace("px", "")
+ 			}
+ 		} else {
+ 			var parent = elem.parentNode;
+ 			var left = elem.offsetLeft;
+			var top  = elem.offsetTop;
+ 			while (W(parent).css("postion")) {
+ 				left  += parent.offsetLeft;
+				top   += parent.offsetTop;
+				parent = parent.parentNode;
+ 			}
+ 			return {
+ 				left : left,
+				top  : top
+ 			}
+ 		}
  	}
  });
