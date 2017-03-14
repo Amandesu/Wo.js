@@ -3,10 +3,18 @@
  import {} from "./tool"
  W.extend({
  	show(){
- 		log( move.linear(0, 100, 10, 100) );
+ 		this.each(elem => {
+ 			var nodeName = elem.nodeName
+ 			var defaultDisplay = Wo.getDisplay(nodeName);
+ 			W(elem).css("display", defaultDisplay);
+ 		});
+ 		return this;
  	},
 	hide(){
-		
+		this.each(elem => {
+ 			W(elem).css("display", "none");
+ 		});
+ 		return this;
 	}, 
 	animate(options, interval, easing, callback){
 		var elem = this[0];
@@ -14,32 +22,37 @@
 		for (var key in options) {           //第一次循环取值
 			entrys[key] = W(elem).css(key);
 		}
+		var cb = {
+			callback: callback.bind(elem),
+			done    : false
+		}
 		for (let key in options) {           //第一次循环取值
-			let s = parseInt(entrys[key])
-			let e = parseInt(options[key])
-			if (key == "opacity") {
-				W(elem).css("opacity", "0")
-			}
-			animate(s, e, interval, easing, function(value){
+			let s = Number(entrys[key].toString().replace("px", ""))
+			let e = Number(options[key].toString().replace("px", ""))
+			proxyAnimate(s, e, interval, easing, function(value){
 				W(elem).css(key, value)
-			}, callback);
+			}, cb);
 		}				
+		return this;
 	}
  });
 
 /** 运动函数 
  */
-var animate = function(start, end, t, easing, fn, callback){
+var proxyAnimate = function(start, end, t, easing, fn, cb){
 	var time = +new Date();
 	var interval = setInterval(function(){
 		var durTime = +new Date() - time;
 		var pos     = speeds[easing](start, end, durTime, t)
 		if (durTime >= t) {
 			clearInterval(interval);
-			fn(end);
-			callback();
+			fn(""+end);
+			if(!cb.done) {
+				cb.done = true;
+				cb.callback()
+			}
 		} else {
-			fn(pos + start*1)
+			fn(""+(pos + start*1));
 		}
 	}, 17)
 }

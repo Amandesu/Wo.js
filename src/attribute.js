@@ -130,7 +130,7 @@
  	 */
  	css: function (name, value) {
  		var getStyle = window.getComputedStyle;
- 		if (!value && !isPlainObject(name)) {
+ 		if (value == undefined && !isPlainObject(name)) {
  			if (isArray(name)) {
  				let obj = {}, len = name.length, elem = this[0];
  				while (len--) {

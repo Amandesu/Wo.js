@@ -12,10 +12,9 @@ import {
 
 import { W
 } from "./w"
-const flagElemRE  = /\s*<([a-zA-Z]+)[^>]*>/g;   
-const singleTagRE = /^\s*<(\w+)\s*\/?>(?:<\/\1>|)\s*$/
-const simpleRE    = /^[_a-zA-Z$](\w)*$/i;
-
+const flagElemRE   = /\s*<([a-zA-Z]+)[^>]*>/g;   
+const singleTagRE  = /^\s*<(\w+)\s*\/?>(?:<\/\1>|)\s*$/
+const simpleRE     = /^[_a-zA-Z$](\w)*$/i; 
 var Wo = {
 	/**  初始化选择器
 	 *@param{String}    selector  选择器
@@ -150,7 +149,25 @@ var Wo = {
 			dom.some(elem => elem == element)
 		)     return true;
 		else  return false;
-	}
+	},
+	/** 获得节点默认的display
+	 *@param{String} nodeName 标签名     
+	 */
+	getDisplay(nodeName) {
+		var elemDisplays = [];            //缓存
+		return function() {
+			var element, display
+		    if (!elemDisplays[nodeName]) {
+				element = document.createElement(nodeName)
+				document.body.appendChild(element)
+				display = getComputedStyle(element, '')["display"]
+				element.parentNode.removeChild(element)
+				//display == "none" && (display = "block")
+				elemDisplays[nodeName] = display
+		    }
+	    	return elemDisplays[nodeName]
+		}();  
+  	}
 }
 
 export {Wo};
