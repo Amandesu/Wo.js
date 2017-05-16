@@ -3,6 +3,9 @@
     npm install     
     npm run build   
     npm run dev
+
+## 设计图
+	基本参照zepto.js的设计
     ![设计图](https://github.com/Amandesu/Wo.js/blob/master/design.png)   
     
 ## 内容
