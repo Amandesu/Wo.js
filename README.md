@@ -1,8 +1,8 @@
 # 构造jquery轮子 命名为Wo.js
-  编写自己的dom库,其中有:
-  npm install
-  npm run build
-  npm run dev
+##  开始
+    npm install     <br/>
+    npm run build   <br/>
+    npm run dev     
 ##  属性的操作
 ##  效果动画
 ##  事件的封装
