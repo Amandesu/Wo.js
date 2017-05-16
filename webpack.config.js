@@ -1,11 +1,12 @@
 var path = require('path')
 var webpack = require('webpack')
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: './entry.js',
     output: {
         path: path.resolve(__dirname, './dist'),
-        publicPath: '/dist/',
+        publicPath: '/',
         filename: 'build.js'
     },
     resolveLoader: {
@@ -37,6 +38,12 @@ module.exports = {
             }
         }]
     },
+    plugins: [
+        new HtmlWebpackPlugin({
+            filename: "index.html",
+            template: './index.html'
+        })
+    ],
     devServer: {
         historyApiFallback: true,
         noInfo: true

@@ -4,7 +4,7 @@
   "author": "keepfool <crmug@outlook.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --hot",
+    "dev": "webpack-dev-server --inline --hot ./dist",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "cross-env": "^1.0.6",
     "css-loader": "^0.23.0",
     "file-loader": "^0.8.4",
+    "html-webpack-plugin": "^2.28.0",
     "json-loader": "^0.5.4",
     "url-loader": "^0.5.7",
     "vue-hot-reload-api": "^1.2.0",
