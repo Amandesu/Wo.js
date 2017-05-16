@@ -2,7 +2,8 @@
 ## 开始
     npm install     
     npm run build   
-    npm run dev   
+    npm run dev
+    ![设计图](https://github.com/Amandesu/Wo.js/blob/master/design.png)   
     
 ## 内容
 ###  [属性的操作](https://github.com/Amandesu/Wo.js/blob/master/src/attribute.js)
